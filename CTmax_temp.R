@@ -160,8 +160,38 @@ kimocc <- read.csv("~/RStuff/masterarbeit/temperature/KIMOCC.csv", header = TRUE
 kimocc$DT <- paste(kimocc$Date, kimocc$Time, sep = " ")
 
 kimocc$DT <- as.POSIXct(kimocc$DT)
+kimocc$Date <- as.Date(kimocc$Date)
 plot(x = kimocc$DT, y = kimocc$T..IPTS.90)
 
-ggplot
+#install.packages("ggplotFL", repos="http://flr-project.org/R")
+
+library(ggplotFL)
+a <- ggplot(kimocc,aes(Date, T..IPTS.90)) +
+  geom_flquantiles(probs=c(0.025, 0.50, 0.975), fill="red", alpha=0.25) + 
+  scale_x_date(date_labels = "%b") +
+  theme_classic() +
+  xlab("") +
+  ylab("Temperature")
+
+a
+
+#subset from March to July
+final <-kimocc[kimocc$Date >= "2022-3-21" & kimocc$Date <= "2022-07-31",]
+f <- ggplot(final,aes(Date, T..IPTS.90)) +
+  geom_flquantiles(probs=c(0.025, 0.50, 0.975), fill="red", alpha=0.25) + 
+  scale_x_date(date_labels = "%b") +
+  theme_classic() +
+  xlab("") +
+  ylab("Temperature")
+
+#add sampling dates
+f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black", linetype = 3)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-05-16"))), col = "black", linetype = 3)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-27"))), col = "black", linetype = 3)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3)
+
+
+
+
 
 
