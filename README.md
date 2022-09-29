@@ -12,3 +12,6 @@ CTmax_plots.R
 
 CTmax_stats.R
 -performs statistical analysis on the main data
+
+CTmax-comb.R
+-was used to convert raw data into csv files used in analysis
