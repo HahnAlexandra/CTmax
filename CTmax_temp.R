@@ -7,33 +7,13 @@ Sys.setenv(LANG = "en")
 Sys.setlocale("LC_TIME", "English")
 setwd("C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature")
 
-
+library(ggplot2)
 library(plyr)   
 library(dplyr)
-
-####read in file####
-setwd("C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature")
-file_list <- list.files()
-
-files <- dir("C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature", 
-             full.names = TRUE)
-df <- lapply(files, function(x) 
-  read.delim(x, sep = '\t', header = FALSE)) %>% 
-  plyr::ldply() 
-write.csv(df, file="C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature/temp_combined.csv")
-
-temp <- read.csv("~/RStuff/masterarbeit/temperature/temp_combined.csv", dec = ",")
-
-write.csv(temp, file="C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature/temp.csv")
-
-plot(temp$X, temp$V3)
-plot(diff(as.numeric(temp$V3)))
 
 ####heaters####
 
 temp_r <- read.csv("~/RStuff/masterarbeit/temperature/temp_running.csv", sep = ";")
-
-library(ggplot2)
 
 i = 1
 
@@ -172,4 +152,16 @@ table <- data.frame(matrix(ncol =7, nrow = 5))
 colnames(table) <- col_names
 
 table$Date <- c("4-6", "5-16", "6-13", "6-27", "7-19" )
+
+#monthly temp
+
+kimocc <- read.csv("~/RStuff/masterarbeit/temperature/KIMOCC.csv", header = TRUE)
+#combine date and time
+kimocc$DT <- paste(kimocc$Date, kimocc$Time, sep = " ")
+
+kimocc$DT <- as.POSIXct(kimocc$DT)
+plot(x = kimocc$DT, y = kimocc$T..IPTS.90)
+
+ggplot
+
 
