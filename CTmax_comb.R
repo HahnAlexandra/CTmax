@@ -45,3 +45,42 @@ temp <- read.csv("~/RStuff/masterarbeit/temperature/temp_combined.csv", dec = ",
 write.csv(temp, file="C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature/temp.csv")
 
 #final csv is edited in excel --> temp_running
+
+
+#### temperature and wild CTmax ####
+#code to create "sub.csv"
+{#before running code load data sets "final" and "wild"
+col_sub <- c("Date", "Temperature")
+
+sub_temp <- subset(final, select = c(1,3))
+colnames(sub_temp) <- col_sub
+sub_temp$Origin <- "kimocc"
+
+sub_wild <- subset(wild, select = c(2,10))
+colnames(sub_wild) <-col_sub
+sub_wild$Origin <- "ctmax"
+sub_wild <- within(sub_wild, { Temperature = (Temperature -20)/0.58 })
+
+sub <- rbind(sub_temp,sub_wild)
+}
+
+sub <- read.csv("~/RStuff/masterarbeit/temperature/sub.csv", header = TRUE)
+mycolors <- c("kimocc" = "#D5968F", "ctmax"= "#178B76")
+sub$Date <-  as.Date(sub$Date)
+
+Sys.setlocale("LC_TIME", "English")#set locale to English to avoid German months
+
+ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
+  geom_path() +
+  geom_point() +
+  theme_light(base_size = 12)+ 
+  xlab("")+
+  scale_y_continuous(name="SST in °C", sec.axis = sec_axis(~ 0.58*.+20, name="CTmax in °C")) +
+  scale_color_manual(name="Origin", values = mycolors) +
+  theme(
+    axis.title.y = element_text(color = mycolors["kimocc"]),
+    axis.text.y = element_text(color = mycolors["kimocc"]),
+    axis.title.y.right = element_text(color = mycolors["ctmax"]),
+    axis.text.y.right = element_text(color = mycolors["ctmax"]),
+    legend.position = "none")
+

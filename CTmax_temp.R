@@ -179,16 +179,18 @@ a
 final <-kimocc[kimocc$Date >= "2022-3-21" & kimocc$Date <= "2022-07-31",]
 f <- ggplot(final,aes(Date, T..IPTS.90)) +
   geom_flquantiles(probs=c(0.025, 0.50, 0.975), fill="red", alpha=0.25) + 
-  scale_x_date(date_labels = "%b") +
-  theme_classic() +
+  theme_light(base_size = 12)+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
   xlab("") +
-  ylab("Temperature")
+  ylab("SST in °C")
 
 #add sampling dates
 f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black", linetype = 3)+
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-05-16"))), col = "black", linetype = 3)+
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-27"))), col = "black", linetype = 3)+
-    geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3)
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-13"))), col = "darkgrey", linetype = 3)
 
 
 
