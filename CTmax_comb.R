@@ -73,9 +73,9 @@ Sys.setlocale("LC_TIME", "English")#set locale to English to avoid German months
 ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
   geom_path() +
   geom_point() +
-  theme_light(base_size = 12)+ 
+  theme_light(base_size = 14)+ 
   xlab("")+
-  scale_y_continuous(name="SST in °C", sec.axis = sec_axis(~ 0.58*.+20, name="CTmax in °C")) +
+  scale_y_continuous(name="Sea Surface Temperature in °C", sec.axis = sec_axis(~ 0.58*.+20, name="Critical thermal maximum in °C")) +
   scale_color_manual(name="Origin", values = mycolors) +
   theme(
     axis.title.y = element_text(color = mycolors["kimocc"]),
