@@ -52,7 +52,7 @@ poster2 <- poster[which(poster$ï..collection != "4"),]
 ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   geom_boxplot(outlier.shape = NA)+
   geom_point(position = position_jitterdodge(jitter.width = 0.2))+
-  theme_light(base_size = 17)+
+  theme_light(base_size = 14)+
   scale_x_discrete(labels=c("2022-04-06" = "April", "2022-05-16" = " May", "2022-06-27" = " June" , "2022-07-19" = "July"))+
   scale_y_continuous(limits = c(23,36), n.breaks = 5)+
   xlab("Sampling time")+ ylab("Critical thermal maximum in °C")+
@@ -66,6 +66,7 @@ ggplot(poster,aes(x=treatment, y=Ctmax, fill=sex_confirmed )) +
   facet_wrap(~date_sampling)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme_light(base_size = 14)+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")
 
@@ -76,7 +77,7 @@ p <- ggplot(assays,aes(x=temperature,
                        color=sex_confirmed,
                        fill = sex_confirmed,
                        group = group)) +
-  theme_light(base_size = 17)+
+  theme_light(base_size = 14)+
   ylab("Critical thermal maximum in °C")+
   xlab("Treatment temperature in °C")+
   theme(legend.position = "right")+
@@ -93,7 +94,7 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  theme_light(base_size = 16)+
+  theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
@@ -103,7 +104,7 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous(limits = c(22.5, 31))+
-theme_light(base_size = 16)+
+theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 

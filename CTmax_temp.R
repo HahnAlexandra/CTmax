@@ -179,7 +179,7 @@ a
 final <-kimocc[kimocc$Date >= "2022-3-21" & kimocc$Date <= "2022-07-31",]
 f <- ggplot(final,aes(Date, T..IPTS.90)) +
   geom_flquantiles(probs=c(0.025, 0.50, 0.975), fill="red", alpha=0.25) + 
-  theme_light(base_size = 12)+
+  theme_light(base_size = 14)+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
   xlab("") +
