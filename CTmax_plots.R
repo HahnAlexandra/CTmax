@@ -35,6 +35,7 @@ assays$position <- factor(assays$position, levels = c("side", "top"))
 
 #subsets
 females <- assays[which(assays$sex_confirmed == "f"),]
+wild <- assays[which(assays$treatment == "wild"),]
 col1 <- assays[which(assays$ï..collection == "1"),]
 col2 <- assays[which(assays$ï..collection == "2"),]
 col3 <- assays[which(assays$ï..collection == "3"),]
@@ -92,7 +93,7 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  theme_light(base_size = 17)+
+  theme_light(base_size = 16)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
@@ -102,7 +103,7 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous(limits = c(22.5, 31))+
-theme_light(base_size = 17)+
+theme_light(base_size = 16)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
