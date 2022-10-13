@@ -50,17 +50,14 @@ library(car)
 library(lattice)
 
 ####visualize individual effects####
-bwplot(Ctmax~treatment|vial_number, data = data)
-bwplot(Ctmax~ï..collection|vial_number, data = data)
-bwplot(Ctmax~treatment|time_assay, data = data)
-bwplot(Ctmax~ï..collection|time_assay, data = data)
-bwplot(Ctmax~treatment|tank_side, data = data)
-bwplot(Ctmax~ï..collection|tank_side, data = data)
+bwplot(Ctmax~treatment|vial_number, data = assays)
+bwplot(Ctmax~ï..collection|vial_number, data = assays)
+bwplot(Ctmax~treatment|time_assay, data = assays)
+bwplot(Ctmax~ï..collection|time_assay, data = assays)
+bwplot(Ctmax~treatment|tank_side, data = assays)
+bwplot(Ctmax~ï..collection|tank_side, data = assays)
 
-interaction.plot(x.factor = data$ï..collection, 
-                 trace.factor = data$treatment, 
-                 response = data$Ctmax,
-                 fun = mean)
+#no visible difference between random effect plots
 
 ####model####
 
@@ -69,18 +66,28 @@ interaction.plot(x.factor = data$ï..collection,
 
 # comparing models 
 m1 <- lmer(Ctmax~treatment*ï..collection + sex_confirmed + (1|vial_number)+ (1|time_assay) + (1|tank_side),
-               data = data)
+               data = assays)
 
 m2 <- lmer(Ctmax~treatment*ï..collection + sex_confirmed + (1|vial_number),
-               data = data)
+               data = assays)
 
 m3 <- lmer(Ctmax~treatment*ï..collection + sex_confirmed + (1|vial_number) + (1|time_assay),
-               data = data)
+               data = assays)
 
 m4 <- lm(Ctmax~treatment*ï..collection + sex_confirmed,
-               data = data)
+               data = assays)
 
-anova(m3, m4)
+m5 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length,
+         data = assays)
+
+m6 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length + temperature,
+         data = assays)
+
+
+anova(m3, m4)#AIC lower for model 4
+summary(m4)
+summary(m5)
+summary(m6)# m5 and m6 have same R-squared, no added value of acclimation temperature
 
 # generates warning bc random effects are too small --> just drop them?
 #random effects do not improve model fit --> drop random effects
@@ -94,9 +101,9 @@ grid.arrange(p[[1]], p[[2]], p[[3]])# no strong effects....
 ####check model####
 
 type3 <- list(treatment = contr.sum,ï..collection = contr.sum, sex_confirmed = contr.sum )
-m6 <- lm(Ctmax~treatment*ï..collection + sex_confirmed,
-         data = data, contrasts = type3)
-Anova(m6, type = 3) # correct type 3
+m7 <- lm(Ctmax~treatment*ï..collection + sex_confirmed,
+         data = assays, contrasts = type3)
+Anova(m7, type = 3) # correct type 3
 
 car::Anova(m4, type=c("III"))# does not work, aliased coefficients???
 summary(m4)
