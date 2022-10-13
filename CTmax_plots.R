@@ -83,8 +83,8 @@ p <- ggplot(assays,aes(x=temperature,
   theme(legend.position = "right")+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  geom_point()
-
+  geom_point(aes(shape = generation), size = 2.75)
+#"#FF8275","#8BA4FF" for darker colours
 p 
 p + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
 
@@ -109,7 +109,26 @@ theme_light(base_size = 14)+
   ylab("Prosome length in µm")
 
 
+#SST and wild CTmax
 
+sub <- read.csv("~/RStuff/masterarbeit/temperature/sub.csv", header = TRUE)
+mycolors <- c("kimocc" = "#D5968F", "ctmax"= "#178B76")
+sub$Date <-  as.Date(sub$Date)
 
+Sys.setlocale("LC_TIME", "English")#set locale to English to avoid German months
 
+ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
+  geom_point() +
+  theme_light(base_size = 14)+ 
+  xlab("")+
+  scale_y_continuous(name="Sea Surface Temperature in °C", sec.axis = sec_axis(~ 0.58*.+20, name="Critical thermal maximum in °C")) +
+  scale_color_manual(name="Origin", values = mycolors) +
+  theme(
+    axis.title.y = element_text(color = mycolors["kimocc"]),
+    axis.text.y = element_text(color = mycolors["kimocc"]),
+    axis.title.y.right = element_text(color = mycolors["ctmax"]),
+    axis.text.y.right = element_text(color = mycolors["ctmax"]),
+    legend.position = "none")
+
+#different plots with avarage temp (2 weeks before, 1 week, etc.)
 

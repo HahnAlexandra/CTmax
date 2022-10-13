@@ -161,7 +161,6 @@ kimocc$DT <- paste(kimocc$Date, kimocc$Time, sep = " ")
 
 kimocc$DT <- as.POSIXct(kimocc$DT)
 kimocc$Date <- as.Date(kimocc$Date)
-plot(x = kimocc$DT, y = kimocc$T..IPTS.90)
 
 #install.packages("ggplotFL", repos="http://flr-project.org/R")
 
@@ -186,11 +185,11 @@ f <- ggplot(final,aes(Date, T..IPTS.90)) +
   ylab("SST in °C")
 
 #add sampling dates
-f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black", linetype = 3)+
-    geom_vline(aes(xintercept = as.numeric(as.Date("2022-05-16"))), col = "black", linetype = 3)+
-    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-27"))), col = "black", linetype = 3)+
-    geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3)+
-    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-13"))), col = "darkgrey", linetype = 3)
+f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black", linetype = 3, size = 1)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-05-16"))), col = "black", linetype = 3, size = 1)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-27"))), col = "black", linetype = 3, size = 1)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3, size = 1)+
+    geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-13"))), col = "darkgrey", linetype = 3, size = 1)
 
 
 

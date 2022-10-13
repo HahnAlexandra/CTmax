@@ -12,6 +12,8 @@ assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
 assays <-  assays[!(is.na(assays$ï..collection)),]
 
+#run for prep 
+{
 # Adding columns based on tank side and mean length:
 
 assays<- assays %>%
@@ -37,6 +39,8 @@ test <- data[which(data$ï..collection != "5"),]
 parents <- data[which(data$generation == "parental"),]
 f1 <- data[which(data$generation == "f1"),]
 females <- assays[which(assays$sex_confirmed == "f"),]
+
+}
 
 ####mixed model####
 library(lme4)
@@ -171,3 +175,5 @@ anova(m5)
 plot(m5)
 car::Anova(m5, type="III")
 
+
+#acclimation temp and size, does size have effect?

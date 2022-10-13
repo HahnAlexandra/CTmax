@@ -71,7 +71,6 @@ sub$Date <-  as.Date(sub$Date)
 Sys.setlocale("LC_TIME", "English")#set locale to English to avoid German months
 
 ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
-  geom_path() +
   geom_point() +
   theme_light(base_size = 14)+ 
   xlab("")+
@@ -83,4 +82,5 @@ ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
     axis.title.y.right = element_text(color = mycolors["ctmax"]),
     axis.text.y.right = element_text(color = mycolors["ctmax"]),
     legend.position = "none")
+
 
