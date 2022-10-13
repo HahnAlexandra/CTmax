@@ -71,7 +71,7 @@ ggplot(poster,aes(x=treatment, y=Ctmax, fill=sex_confirmed )) +
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")
 
 
-group <- interaction(assays$temperature,assays$sex_confirmed)
+group <- interaction(assays$temperature,assays$sex_confirmed)#with old temp measurements
 p <- ggplot(assays,aes(x=temperature, 
                        y=Ctmax,
                        color=sex_confirmed,
@@ -87,6 +87,59 @@ p <- ggplot(assays,aes(x=temperature,
 #"#FF8275","#8BA4FF" for darker colours
 p 
 p + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+
+group_mean <- interaction(assays$daily_mean,assays$sex_confirmed)#with daily mean kimocc
+p_mean <- ggplot(assays,aes(x=daily_mean, 
+                       y=Ctmax,
+                       color=sex_confirmed,
+                       fill = sex_confirmed,
+                       group = group)) +
+  theme_light(base_size = 14)+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Treatment temperature in °C")+
+  theme(legend.position = "right")+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  geom_point(aes(shape = generation), size = 2.75)
+#"#FF8275","#8BA4FF" for darker colours
+p_mean 
+pm <- p_mean + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+
+group_1w <- interaction(assays$X1.week_mean,assays$sex_confirmed)#with 1-week mean
+p_1w <- ggplot(assays,aes(x=X1.week_mean, 
+                            y=Ctmax,
+                            color=sex_confirmed,
+                            fill = sex_confirmed,
+                            group = group)) +
+  theme_light(base_size = 14)+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Treatment temperature in °C")+
+  theme(legend.position = "right")+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  geom_point(aes(shape = generation), size = 2.75)
+
+p_1w
+p1 <- p_1w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+
+group_2w <- interaction(assays$X2.week_mean,assays$sex_confirmed)#with 2-week mean
+p_2w <- ggplot(assays,aes(x=X2.week_mean, 
+                          y=Ctmax,
+                          color=sex_confirmed,
+                          fill = sex_confirmed,
+                          group = group)) +
+  theme_light(base_size = 14)+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Treatment temperature in °C")+
+  theme(legend.position = "right")+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  geom_point(aes(shape = generation), size = 2.75)
+
+p_2w
+p2 <- p_2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+
+grid.arrange(pm, p1, p2)
 
 #males and females - length
 ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
