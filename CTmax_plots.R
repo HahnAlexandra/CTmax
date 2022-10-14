@@ -139,11 +139,12 @@ p_2w <- ggplot(assays,aes(x=X2.week_mean,
 p_2w
 p2 <- p_2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
 
+library(gridExtra)
 grid.arrange(pm, p1, p2)
 
 #males and females - length
 ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
-  geom_point(size = 2)+
+  geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
@@ -152,7 +153,7 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   ylab("Prosome length in µm")
 
 ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
-  geom_point(size = 2)+
+  geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
@@ -183,5 +184,4 @@ ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
     axis.text.y.right = element_text(color = mycolors["ctmax"]),
     legend.position = "none")
 
-#different plots with avarage temp (2 weeks before, 1 week, etc.)
 
