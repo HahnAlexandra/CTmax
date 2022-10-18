@@ -35,12 +35,83 @@ assays$time_assay <- factor(assays$time_assay, levels = c("morning", "afternoon"
 
 #subsets
 data <- assays[which(assays$ï..collection != "3"),]
-test <- data[which(data$ï..collection != "5"),]
 parents <- data[which(data$generation == "parental"),]
 f1 <- data[which(data$generation == "f1"),]
 females <- assays[which(assays$sex_confirmed == "f"),]
+data <- data[which(data$Ctmax < 32),]
 
 }
+
+####multiple regression####
+
+#check normality
+hist(assays$Ctmax)
+shapiro.test(assays$Ctmax)
+
+hist(data$Ctmax)#outliers above 32 °C removed, still not normal
+shapiro.test(data$Ctmax)
+
+# check linearity
+
+plot(Ctmax~temperature, data = data)
+abline(lm(data$Ctmax~data$temperature), col = "red")
+
+plot(Ctmax~X2.week_mean, data = data)
+abline(lm(data$Ctmax~data$X2.week_mean), col = "red")
+
+#check correlation
+
+cor.test(data$temperature, data$length, method= "spearman")#to 46% negatively correlated
+cor.test(data$X2.week_mean, data$length, method= "spearman")#to 56% negatively correlated
+
+#build models
+
+m1<- lm(Ctmax~temperature*ï..collection + sex_confirmed + treatment,
+        data = assays)
+summary(m1)
+
+m2<- lm(Ctmax~treatment*ï..collection + sex_confirmed,
+        data = assays)
+summary(m2)
+
+m3<- lm(Ctmax~treatment*ï..collection + sex_confirmed + temperature,
+        data = data)
+summary(m3)
+
+
+m4<- lm(Ctmax~treatment*ï..collection + sex_confirmed,
+        data = data)
+summary(m4)
+
+m5<- lm(Ctmax~temperature*ï..collection + sex_confirmed,
+        data = data)
+summary(m5)# lower R-squared but makes more sense to me
+
+data$X2.week_mean <- as.factor(data$X2.week_mean)
+
+m6<- lm(Ctmax~X2.week_mean*ï..collection + sex_confirmed,
+        data = data)
+summary(m6)
+
+#compare models
+
+AIC(m3,m4)#the same --> simpler model m4
+AIC(m4, m5)#m5 lower AIC
+AIC(m5, m6)#m6 lower AIC only if temp is factor 
+
+# test for normality, autocorrelation etc.
+
+hist(resid(m6))
+ols_plot_resid_hist(m6)#looks normal
+ols_test_normality(m6)
+#Kolmogorov-Smirnov for observations larger than 50, if p-value is > 0.05 --> residuals normally distributed
+
+par(mfrow = c(2,2))
+plot(m6)
+par(mfrow = c(1,1))
+
+durbinWatsonTest(m6)#no autocorrelation if p > 0.05
+
 
 ####mixed model####
 library(lme4)
@@ -61,6 +132,7 @@ bwplot(Ctmax~ï..collection|tank_side, data = assays)
 
 ####model####
 
+
 #m1 <- lme(fixed = Ctmax~treatment*ï..collection, random = ~1|vial_number, method = "ML", data = data)
 # Error bc instead of lme use lmer
 
@@ -80,6 +152,12 @@ m4 <- lm(Ctmax~treatment*ï..collection + sex_confirmed,
 m5 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length,
          data = assays)
 
+m5_2 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + temperature,
+         data = assays)
+
+m5_3 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + X2.week_mean,
+           data = assays)
+
 m6 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length + temperature,
          data = assays)
 
@@ -87,7 +165,10 @@ m6 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length + temperature,
 anova(m3, m4)#AIC lower for model 4
 summary(m4)
 summary(m5)
+summary(m5_2)
+summary(m5_3)
 summary(m6)# m5 and m6 have same R-squared, no added value of acclimation temperature
+
 
 # generates warning bc random effects are too small --> just drop them?
 #random effects do not improve model fit --> drop random effects
@@ -115,7 +196,7 @@ qqline(resid(m4), col = "red")
 
 #f1 model vs wild model
 #genotyping - two species?
-#temperature - polarfuchs data 
+
 
 library(multcompView)
 
