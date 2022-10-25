@@ -8,6 +8,7 @@ Sys.setenv(LANG = "en")
 
 library(ggplot2)
 library(dplyr)
+library(wesanderson)
 
 assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
@@ -36,13 +37,10 @@ assays$position <- factor(assays$position, levels = c("side", "top"))
 #subsets
 females <- assays[which(assays$sex_confirmed == "f"),]
 wild <- assays[which(assays$treatment == "wild"),]
-col1 <- assays[which(assays$ï..collection == "1"),]
-col2 <- assays[which(assays$ï..collection == "2"),]
-col3 <- assays[which(assays$ï..collection == "3"),]
-col4 <- assays[which(assays$ï..collection == "4"),]
-col5 <- assays[which(assays$ï..collection == "5"),]
 poster <- assays[which(assays$ï..collection != "3"),]
 poster2 <- poster[which(poster$ï..collection != "4"),]
+data <- poster[which(poster$Ctmax < 32),]
+data$mean2 <- as.factor(data$X2.week_mean)
 
 } 
 
@@ -58,6 +56,16 @@ ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   xlab("Sampling time")+ ylab("Critical thermal maximum in °C")+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "treatment")
+
+ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
+  geom_boxplot(outlier.shape = NA)+
+  theme_light(base_size = 14)+
+  scale_fill_gradientn(colors = wes_palette("Zissou1", type = "continuous"))+
+  xlab("")+ ylab("Critical thermal maximum in °C")+
+  labs(fill = "Developmental temperature in °C")+
+  theme(legend.position = "bottom")
+  
+
 
 #males and females - thermal tolerance
 ggplot(poster,aes(x=treatment, y=Ctmax, fill=sex_confirmed )) +
@@ -162,6 +170,16 @@ theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
+ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_x_continuous()+
+  theme_light(base_size = 14)+
+  xlab("Acclimation temperature")+
+  ylab("Prosome length in µm")
+
 
 #SST and wild CTmax
 
@@ -184,4 +202,8 @@ ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
     axis.text.y.right = element_text(color = mycolors["ctmax"]),
     legend.position = "none")
 
-
+wild <- assays[which(assays$treatment == "wild"),]
+cor.test(wild$Ctmax, wild$X2.week_mean, method = "spearman")
+#strong correlation btw wild Ctmax and temperature, spearman's p = 0.771
+#stonger than for "temperature" 
+cor.test(wild$Ctmax, wild$X2.week_mean)# pearson's r = 0.725
