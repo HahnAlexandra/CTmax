@@ -7,6 +7,8 @@ setwd("C:/Users/A.Hahn/Documents/RStuff/masterarbeit")
 Sys.setenv(LANG = "en")
 
 library(dplyr)
+library(olsrr)
+library(car)
 
 assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
@@ -65,13 +67,68 @@ cor.test(data$temperature, data$length, method= "spearman")#to 46% negatively co
 cor.test(data$X2.week_mean, data$length, method= "spearman")#to 56% negatively correlated
 
 #build models
+#small models
+
+boxplot(data$Ctmax ~ data$ï..collection)
+a1 <- aov(data$Ctmax ~ data$ï..collection)
+Anova(a1)
+TukeyHSD(a1)
+
+boxplot(data$Ctmax ~ data$treatment)
+a2 <- aov(data$Ctmax ~ data$treatment)
+Anova(a2)
+TukeyHSD(a2)
+
+data$X2.week_mean <- as.factor(data$X2.week_mean)# is that allowed, useful?
+boxplot(data$Ctmax ~ data$X2.week_mean)
+a3 <- aov(data$Ctmax ~ data$X2.week_mean)
+Anova(a3)
+TukeyHSD(a3)
+
+#anova
+
+library(multcomp)
+library(multcompView)
+
+#a4 <- aov(data$Ctmax~data$ï..collection*data$treatment)
+a4 <- aov(data$Ctmax~data$ï..collection:data$treatment)
+summary(a4)
+Anova(a4, type="III")
+tukeya4 <- TukeyHSD(a4)
+plot(tukeya4)
+
+tukey <- TukeyHSD(a4, conf.level = .95)
+print(tukey)
+
+#compact letters 
+library(emmeans)
+library(multcomp)
+library(multcompView)
+
+int <- interaction(data$treatment, data$ï..collection)
+model <- lm(Ctmax ~ int, data = data)
+boxplot(Ctmax ~int, data = data)
+
+
+model_means <- emmeans(object = model,
+                       specs = "int")#gets adjusted and weighted means per group
+
+model_means_cld <- cld(object = model_means,
+                       adjust = "Tukey",
+                       Letters = letters,
+                       alpha = 0.05)#adds compact letters
+
+model_means_cld#warm ones are together, cold ones are together with wild 2
+
+
+#big models
 
 m1<- lm(Ctmax~temperature*ï..collection + sex_confirmed + treatment,
-        data = assays)
+        data = data)
 summary(m1)
 
 m2<- lm(Ctmax~treatment*ï..collection + sex_confirmed,
-        data = assays)
+        data = data)
 summary(m2)
 
 m3<- lm(Ctmax~treatment*ï..collection + sex_confirmed + temperature,
@@ -87,7 +144,7 @@ m5<- lm(Ctmax~temperature*ï..collection + sex_confirmed,
         data = data)
 summary(m5)# lower R-squared but makes more sense to me
 
-data$X2.week_mean <- as.factor(data$X2.week_mean)
+data$X2.week_mean <- as.factor(data$X2.week_mean)# is that allowed, useful?
 
 m6<- lm(Ctmax~X2.week_mean*ï..collection + sex_confirmed,
         data = data)
@@ -96,8 +153,8 @@ summary(m6)
 #compare models
 
 AIC(m3,m4)#the same --> simpler model m4
-AIC(m4, m5)#m5 lower AIC
-AIC(m5, m6)#m6 lower AIC only if temp is factor 
+AIC(m4, m5)#m4 lower AIC
+AIC(m4, m6)#how can it be the same? 
 
 # test for normality, autocorrelation etc.
 
@@ -214,7 +271,6 @@ plot(cooks.distance(m4), type="h")#cook's distance shouldn't be larger than 1
 
 
 #####post-hoc testing#####
-library(multcomp)
 library(emmeans)
 library(LMERConvenienceFunctions)
 pairwise.t.test(test$Ctmax, test$treatment, p.adjust ="holm")
@@ -226,23 +282,6 @@ summary(glht(model= m5, linfct= mcp(interaction = "Tukey")))
 
 
 #normal tukey does not work for lm....
-
-#tukey <- TukeyHSD(m4, conf.level = .95)
-#print(tukey)
-
-#cld <- multcompLetters4(m4, tukey) #add compact letters to indicate differences
-#print(cld)
-
-#table
-#Tk<- group_by(data, interaction(treatment, ï..collection))%>%
-#  summarise(mean = mean(Ctmax), quant = quantile(Ctmax, probs = 0.75))%>%
-#  arrange(desc(mean))
-#print(Tk)
-
-#cld<- as.data.frame.list(cld$`data$treatment:data$ï..collection`)
-#Tk$cld<-cld$Letters
-#print(Tk)
-
 
 ####only f1####
 
