@@ -61,12 +61,11 @@ ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
   geom_boxplot(outlier.shape = NA)+
   theme_light(base_size = 14)+
   scale_fill_gradientn(colors = wes_palette("Zissou1", type = "continuous"))+
+  scale_x_discrete(labels =c("6.36" = "6.36 °C", "6.36" = "6.36 °C", "10.8" = "10.8 °C","11.44" = "11.44 °C","16.55" = "16.55 °C","17.9" = "17.9 °C" ,"18.11" = "18.11 °C"))+
   xlab("")+ ylab("Critical thermal maximum in °C")+
   labs(fill = "Developmental temperature in °C")+
   theme(legend.position = "bottom")
   
-
-
 #males and females - thermal tolerance
 ggplot(poster,aes(x=treatment, y=Ctmax, fill=sex_confirmed )) +
   geom_boxplot(outlier.shape = NA) +
