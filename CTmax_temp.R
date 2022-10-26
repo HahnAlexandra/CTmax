@@ -90,7 +90,7 @@ ggplot(temp_r, aes(x = temperature, y = difference))+
 
 library(wesanderson)
 
-polarfuchs <- read.csv("~/RStuff/masterarbeit/polarfuchs/master.csv")
+polarfuchs <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/master.csv")
 polarfuchs$Date <- paste(polarfuchs$Year, polarfuchs$Month, polarfuchs$Day, sep = "-")
 polarfuchs$Date <- as.Date(polarfuchs$Date)
 
@@ -104,7 +104,7 @@ ggplot(polarfuchs, aes(x = Date, y = Pressure..db, color = Temp..degC))+
     y = "Depth [m]", x = "Date", color = "Temperature [°C]")
  
 
-p_exp <- read.csv("~/RStuff/masterarbeit/polarfuchs/exp/master.csv")
+p_exp <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/exp/master.csv")
 p_exp$Date <- paste(p_exp$Year, p_exp$Month, p_exp$Day, sep = "-")
 
 p_exp$Date <- as.Date(p_exp$Date) 
@@ -168,9 +168,9 @@ library(ggplotFL)
 a <- ggplot(kimocc,aes(Date, T..IPTS.90)) +
   geom_flquantiles(probs=c(0.025, 0.50, 0.975), fill="red", alpha=0.25) + 
   scale_x_date(date_labels = "%b") +
-  theme_classic() +
+  theme_light(base_size = 14) +
   xlab("") +
-  ylab("Temperature")
+  ylab("SST in °C")
 
 a
 
@@ -191,8 +191,24 @@ f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3, size = 1)+
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-13"))), col = "darkgrey", linetype = 3, size = 1)
 
+#daily average
+mean(final$T..IPTS.90[which(final$Date == "2022-04-06")] )#5.81
+mean(final$T..IPTS.90[which(final$Date == "2022-05-16")] )#12.66
+mean(final$T..IPTS.90[which(final$Date == "2022-06-27")] )#18.35
+mean(final$T..IPTS.90[which(final$Date == "2022-07-19")] )#19.16
+mean(final$T..IPTS.90[which(final$Date == "2022-06-13")] )#12.37
 
+#1-week average
 
+mean(final$T..IPTS.90[which(final$Date >= "2022-03-30" & final$Date <= "2022-04-06")])#6.09
+mean(final$T..IPTS.90[which(final$Date >= "2022-05-09" & final$Date <= "2022-05-16")])#11.29
+mean(final$T..IPTS.90[which(final$Date >= "2022-06-20" & final$Date <= "2022-06-27")])#17.78
+mean(final$T..IPTS.90[which(final$Date >= "2022-07-10" & final$Date <= "2022-07-19")])#18.50
+mean(final$T..IPTS.90[which(final$Date >= "2022-06-06" & final$Date <= "2022-06-13")])#11.99
 
-
-
+#2-week average
+mean(final$T..IPTS.90[which(final$Date >= "2022-03-23" & final$Date <= "2022-04-06")])#6.36
+mean(final$T..IPTS.90[which(final$Date >= "2022-05-02" & final$Date <= "2022-05-16")])#11.44
+mean(final$T..IPTS.90[which(final$Date >= "2022-06-13" & final$Date <= "2022-06-27")])#16.55
+mean(final$T..IPTS.90[which(final$Date >= "2022-07-03" & final$Date <= "2022-07-19")])#18.11
+mean(final$T..IPTS.90[which(final$Date >= "2022-05-30" & final$Date <= "2022-06-13")])#12.86
