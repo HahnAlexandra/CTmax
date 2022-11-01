@@ -9,6 +9,9 @@ Sys.setenv(LANG = "en")
 library(dplyr)
 library(olsrr)
 library(car)
+library(emmeans)
+library(multcomp)
+library(multcompView)
 
 assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
@@ -36,14 +39,18 @@ assays$position <- factor(assays$position, levels = c("side", "top"))
 assays$time_assay <- factor(assays$time_assay, levels = c("morning", "afternoon"))
 
 #subsets
-data <- assays[which(assays$ï..collection != "3"),]
-parents <- data[which(data$generation == "parental"),]
-f1 <- data[which(data$generation == "f1"),]
-females <- assays[which(assays$sex_confirmed == "f"),]
-data <- data[which(data$Ctmax < 32),]
+data_all  <- assays[which(assays$ï..collection != "3"),]
+parents <- data_all[which(data_all$generation == "parental"),]
+f1 <- data_all[which(data_all$generation == "f1"),]
+data_all$mean2 <- as.factor(data_all$X2.week_mean)
+data <- data_all[which(data_all$Ctmax < 32),]
 
 }
 
+df1 <- data %>%
+  dplyr::select(Ctmax, treatment, sex_confirmed, length, ï..collection, X2.week_mean) %>%
+  plot()
+ 
 ####multiple regression####
 
 #check normality
@@ -66,7 +73,7 @@ abline(lm(data$Ctmax~data$X2.week_mean), col = "red")
 cor.test(data$temperature, data$length, method= "spearman")#to 46% negatively correlated
 cor.test(data$X2.week_mean, data$length, method= "spearman")#to 56% negatively correlated
 
-#build models
+#####build models#####
 #small models
 
 boxplot(data$Ctmax ~ data$ï..collection)
@@ -82,31 +89,77 @@ TukeyHSD(a2)
 data$X2.week_mean <- as.factor(data$X2.week_mean)# is that allowed, useful?
 boxplot(data$Ctmax ~ data$X2.week_mean)
 a3 <- aov(data$Ctmax ~ data$X2.week_mean)
+summary(a3)
 Anova(a3)
 TukeyHSD(a3)
 
-#anova
+mm3 <- emmeans(object = a3,
+                       specs = "X2.week_mean")#gets adjusted and weighted means per group
 
-library(multcomp)
-library(multcompView)
+mm3_cld <- cld(object = mm3,
+                       adjust = "sidak",
+                       Letters = letters,
+                       alpha = 0.05)#adds compact letters
+
+mm3_cld
+
+#anova
 
 #a4 <- aov(data$Ctmax~data$ï..collection*data$treatment)
 a4 <- aov(data$Ctmax~data$ï..collection:data$treatment)
 summary(a4)
-Anova(a4, type="III")
-tukeya4 <- TukeyHSD(a4)
-plot(tukeya4)
+TukeyHSD(a4)
 
 tukey <- TukeyHSD(a4, conf.level = .95)
 print(tukey)
 
-#compact letters 
-library(emmeans)
-library(multcomp)
-library(multcompView)
+AIC(a3, a4)#AIC lower for 4 --> interaction of col and treatment is better predictor of CTmax than temperature
 
+a5 <- aov(Ctmax ~ ï..collection * treatment, data = data)
+summary(a5)
+
+a6 <- aov(Ctmax ~ ï..collection * treatment * length, data = data)
+summary(a6)
+
+a7 <- aov(Ctmax ~ ï..collection * treatment * length * sex_confirmed, data = data)
+summary(a7)
+
+plot(Ctmax~length, data = data)
+abline(lm(data$Ctmax~data$length), col = "red")
+
+a8 <- aov(Ctmax ~ length, data = data)
+summary(a8)
+
+a8 <- lm(Ctmax~ length*sex_confirmed, data = data)
+summary(a8)#explains 22 % of variance
+anova(a8)
+
+#compact letters
+#lm interactions
+
+#all
+int_a <- interaction(data_all$treatment, data_all$ï..collection)
+model_a <- lm(Ctmax ~ int_a, data = data_all)
+summary(model_a)
+anova(model_a)
+boxplot(Ctmax ~int_a, data = data_all)
+
+
+model_means_a <- emmeans(object = model_a,
+                       specs = "int_a")#gets adjusted and weighted means per group
+
+model_means_cld_a <- cld(object = model_means_a,
+                       adjust = "sidak",
+                       Letters = letters,
+                       alpha = 0.05)#adds compact letters
+
+model_means_cld_a
+
+#without outliers
 int <- interaction(data$treatment, data$ï..collection)
 model <- lm(Ctmax ~ int, data = data)
+summary(model)
+anova(model)
 boxplot(Ctmax ~int, data = data)
 
 
@@ -114,14 +167,72 @@ model_means <- emmeans(object = model,
                        specs = "int")#gets adjusted and weighted means per group
 
 model_means_cld <- cld(object = model_means,
-                       adjust = "Tukey",
+                       adjust = "sidak",
                        Letters = letters,
                        alpha = 0.05)#adds compact letters
 
 model_means_cld#warm ones are together, cold ones are together with wild 2
 
+int2 <- interaction(data$mean2, data$ï..collection)
+model2 <- lm(Ctmax ~ int2, data = data)
+summary(model2)
+boxplot(Ctmax ~ int2, data = data)
 
-#big models
+model_means2 <- emmeans(object = model2,
+                       specs = "int2")#gets adjusted and weighted means per group
+
+model_means_cld2 <- cld(object = model_means2,
+                       adjust = "sidak",
+                       Letters = letters,
+                       alpha = 0.05)#adds compact letters
+
+model_means_cld2# same as treatment 
+
+hist(resid(model))
+ols_test_normality(model)
+ols_test_correlation(model)#correlation between observed and expected residuals (under normality)
+
+
+par(mfrow = c(2,2))
+plot(model)
+par(mfrow = c(1,1))
+
+durbinWatsonTest(model)#no autocorrelation if p > 0.05
+
+model3 <- lm(Ctmax ~ int + sex_confirmed, data = data)
+summary(model3)
+
+#####big models#####
+
+M1a <- lm(Ctmax ~ treatment * ï..collection * sex_confirmed * length, data = data)
+
+M1 <- lm(Ctmax ~ treatment * ï..collection * sex_confirmed, data = data)
+summary(M1)
+anova(M1)
+
+M1a <- update(M1,~.-length, data = data)
+M1b <- update(M1a,~.-treatment:ï..collection:length, data = data)
+M1c <- update(M1b,~.-treatment:ï..collection:sex_confirmed:length, data = data)
+M1d <- update(M1c,~.-ï..collection:sex_confirmed, data = data )
+M1e <- update(M1d,~.-ï..collection:length, data = data)                      
+M1f <- update(M1e,~.-sex_confirmed:length, data = data)
+M1g <- update(M1f,~.-treatment:length, data = data)
+M1h <- update(M1g,~.-treatment:ï..collection:sex_confirmed, data = data)
+M1i <- update(M1h,~.-ï..collection:sex_confirmed:length, data = data)
+M1j <- update(M1i,~.-treatment:sex_confirmed:length, data = data)
+
+
+M2 <- update(M1,~.-ï..collection:sex_confirmed , data = data)
+anova(M2)
+
+M3 <- update(M2,~.-treatment:ï..collection:sex_confirmed, data = data)
+anova(M3)
+
+M4 <- update(M3,~.-treatment:sex_confirmed, data = data)
+anova(M4)
+
+anova(M1,M4)
+
 
 m1<- lm(Ctmax~temperature*ï..collection + sex_confirmed + treatment,
         data = data)
@@ -139,6 +250,12 @@ summary(m3)
 m4<- lm(Ctmax~treatment*ï..collection + sex_confirmed,
         data = data)
 summary(m4)
+anova(m4)
+
+m4a <- lm(Ctmax~treatment*ï..collection + sex_confirmed + sex_confirmed:length,
+          data = assays)
+summary(m4a)#for whole data-set length is relevant, model expalins 80.87 % of variance
+anova(m4a)
 
 m5<- lm(Ctmax~temperature*ï..collection + sex_confirmed,
         data = data)
@@ -150,6 +267,9 @@ m6<- lm(Ctmax~X2.week_mean*ï..collection + sex_confirmed,
         data = data)
 summary(m6)
 
+m7 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length, data = data)
+anova(m7)#length not significant in "outlier-free data set"
+
 #compare models
 
 AIC(m3,m4)#the same --> simpler model m4
@@ -158,17 +278,18 @@ AIC(m4, m6)#how can it be the same?
 
 # test for normality, autocorrelation etc.
 
-hist(resid(m6))
-ols_plot_resid_hist(m6)#looks normal
-ols_test_normality(m6)
+hist(resid(m4))
+ols_plot_resid_hist(m4)#looks normal
+ols_test_normality(m4)
 #Kolmogorov-Smirnov for observations larger than 50, if p-value is > 0.05 --> residuals normally distributed
 
 par(mfrow = c(2,2))
-plot(m6)
+plot(m4)
 par(mfrow = c(1,1))
 
 durbinWatsonTest(m6)#no autocorrelation if p > 0.05
 
+####Model <- lm(Ctmax~treatment*ï..collection + sex_confirmed, data = data)#####
 
 ####mixed model####
 library(lme4)
@@ -222,6 +343,7 @@ m6 <- lm(Ctmax~treatment*ï..collection + sex_confirmed + length + temperature,
 anova(m3, m4)#AIC lower for model 4
 summary(m4)
 summary(m5)
+anova(m5)
 summary(m5_2)
 summary(m5_3)
 summary(m6)# m5 and m6 have same R-squared, no added value of acclimation temperature
