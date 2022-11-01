@@ -47,7 +47,12 @@ data$mean2 <- as.factor(data$X2.week_mean)
 #####plots#####
 
 #CTmax - all collections
-ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
+poster2 <- distinct(poster, date_sampling, treatment)%>%
+  arrange(date_sampling, treatment)
+poster2$yloc <- max(poster$Ctmax)+ .5
+poster2$label <- c("a", "b", "cd", "bc", "a", "bcd", "de", "bc", "f", "ef", "bc", "g")#compact letter from Ctmax_stats
+
+Ctmax_all <- ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   geom_boxplot(outlier.shape = NA)+
   geom_point(position = position_jitterdodge(jitter.width = 0.2))+
   theme_light(base_size = 14)+
@@ -57,8 +62,18 @@ ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")
 
+Ctmax_all +
+  ylim(NA, max(poster$Ctmax)+ .5)+
+  geom_text(data = poster2, aes(y = yloc, label = label),
+            position = position_dodge(width = .75))
+
 #Ctmax - outliers removed
-ggplot(data, aes(x=date_sampling, y=Ctmax, fill=treatment))+
+data2 <- distinct(data, date_sampling, treatment)%>%
+  arrange(date_sampling, treatment)
+data2$yloc <- max(data$Ctmax)+ .5
+data2$label <- c("a", "b", "c", "b", "a", "c", "c", "b", "c", "c", "b")#compact letter from Ctmax_stats
+
+Ctmax_out <- ggplot(data, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   geom_boxplot(outlier.shape = NA)+
   geom_point(position = position_jitterdodge(jitter.width = 0.2))+
   theme_light(base_size = 14)+
@@ -67,6 +82,14 @@ ggplot(data, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   xlab("Sampling time")+ ylab("Critical thermal maximum in °C")+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")
+
+Ctmax_out
+
+Ctmax_out +
+  ylim(NA, max(data$Ctmax)+ .5)+
+  geom_text(data = data2, aes(y = yloc, label = label),
+            position = position_dodge(width = .75))
+
 
 
 #Ctmax developmental temperature (+temp gradient)
