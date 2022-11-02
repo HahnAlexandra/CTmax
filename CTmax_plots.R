@@ -35,12 +35,10 @@ assays$tank_side <- factor(assays$tank_side, levels = c("left", "right"))
 assays$position <- factor(assays$position, levels = c("side", "top"))
 
 #subsets
-females <- assays[which(assays$sex_confirmed == "f"),]
+assays$mean2 <- as.factor(assays$X2.week_mean)
 wild <- assays[which(assays$treatment == "wild"),]
 poster <- assays[which(assays$ï..collection != "3"),]
-poster2 <- poster[which(poster$ï..collection != "4"),]
 data <- poster[which(poster$Ctmax < 32),]
-data$mean2 <- as.factor(data$X2.week_mean)
 
 } 
 
@@ -105,6 +103,17 @@ ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
 #Ctmax developmental temperature (+treatment)
 ggplot(data, aes(x = mean2, y = Ctmax, fill = treatment))+
   geom_boxplot(outlier.shape = NA)+
+  geom_point(position = position_jitterdodge(jitter.width = 0.6))+
+  theme_light(base_size = 14)+
+  scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")+
+  scale_x_discrete(labels =c("6.36" = "6.36 °C", "6.36" = "6.36 °C", "10.8" = "10.8 °C","11.44" = "11.44 °C","16.55" = "16.55 °C","17.9" = "17.9 °C" ,"18.11" = "18.11 °C"))+
+  xlab("")+ ylab("Critical thermal maximum in °C")+
+  labs(fill = "Developmental temperature in °C")+
+  theme(legend.position = "bottom")
+
+ggplot(poster, aes(x = mean2, y = Ctmax, fill = treatment))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_point(position = position_jitterdodge(jitter.width = 0.6))+
   theme_light(base_size = 14)+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")+
   scale_x_discrete(labels =c("6.36" = "6.36 °C", "6.36" = "6.36 °C", "10.8" = "10.8 °C","11.44" = "11.44 °C","16.55" = "16.55 °C","17.9" = "17.9 °C" ,"18.11" = "18.11 °C"))+
@@ -229,6 +238,15 @@ ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous(limits = c(22.5, 31))+
 theme_light(base_size = 14)+
+  xlab("Critical thermal maximum in °C")+
+  ylab("Prosome length in µm")
+
+ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
