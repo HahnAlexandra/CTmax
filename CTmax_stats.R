@@ -86,9 +86,9 @@ a2 <- aov(data$Ctmax ~ data$treatment)
 Anova(a2)
 TukeyHSD(a2)
 
-data$X2.week_mean <- as.factor(data$X2.week_mean)# is that allowed, useful?
-boxplot(data$Ctmax ~ data$X2.week_mean)
-a3 <- aov(data$Ctmax ~ data$X2.week_mean)
+
+boxplot(data$Ctmax ~ data$mean2)
+a3 <- aov(data$Ctmax ~ data$mean2)
 summary(a3)
 Anova(a3)
 TukeyHSD(a3)
@@ -102,6 +102,23 @@ mm3_cld <- cld(object = mm3,
                        alpha = 0.05)#adds compact letters
 
 mm3_cld
+
+#for all data points
+boxplot(data_all$Ctmax ~ data_all$mean2)
+a3b <- aov(data_all$Ctmax ~ data_all$mean2)
+Anova(a3b)
+TukeyHSD(a3b)
+
+mm3b <- emmeans(object = a3b,
+               specs = "mean2")#gets adjusted and weighted means per group
+
+mm3b_cld <- cld(object = mm3b,
+               adjust = "sidak",
+               Letters = letters,
+               alpha = 0.05)#adds compact letters
+
+mm3b_cld
+
 
 #anova
 
