@@ -44,6 +44,14 @@ data <- poster[which(poster$Ctmax < 32),]
 
 #####plots#####
 
+#species - CTmax
+ggplot(poster, aes(x = Ctmax, y = length, col = species))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  scale_color_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "species")+
+  theme_light(base_size = 14)+
+  xlab("Critical thermal maximum in °C")+
+  ylab("Prosome length in µm")
+
 #CTmax - all collections
 poster2 <- distinct(poster, date_sampling, treatment)%>%
   arrange(date_sampling, treatment)
