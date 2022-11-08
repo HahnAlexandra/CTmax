@@ -44,7 +44,7 @@ data <- poster[which(poster$Ctmax < 32),]
 
 #####plots#####
 
-#species - CTmax
+####species - CTmax/length####
 ggplot(poster, aes(x = Ctmax, y = length, col = species))+
   geom_point(aes(shape = generation), size = 2.75)+
   scale_color_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "species")+
@@ -52,6 +52,7 @@ ggplot(poster, aes(x = Ctmax, y = length, col = species))+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
+####CTmax####
 #CTmax - all collections
 poster2 <- distinct(poster, date_sampling, treatment)%>%
   arrange(date_sampling, treatment)
@@ -128,7 +129,8 @@ ggplot(poster, aes(x = mean2, y = Ctmax, fill = treatment))+
   xlab("")+ ylab("Critical thermal maximum in °C")+
   labs(fill = "Developmental temperature in °C")+
   theme(legend.position = "bottom")
-  
+
+####males and females####  
 #males and females - thermal tolerance
 ggplot(poster,aes(x=treatment, y=Ctmax, fill=sex_confirmed )) +
   geom_boxplot(outlier.shape = NA) +
@@ -228,7 +230,7 @@ grid.arrange(pm, p1, p2)
 combined_plot <- grid.arrange(pm, p1, p2, ncol = 1, nrow = 3)
 plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(3/4, 1/4))
 
-
+####length####
 #males and females - length
 ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
@@ -268,7 +270,7 @@ ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   xlab("Developmental temperature in °C")+
   ylab("Prosome length in µm")
 
-
+####wild CTmax####
 #SST and wild CTmax
 
 sub <- read.csv("~/RStuff/masterarbeit/temperature/sub.csv", header = TRUE)
