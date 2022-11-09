@@ -9,6 +9,8 @@ Sys.setenv(LANG = "en")
 library(ggplot2)
 library(dplyr)
 library(wesanderson)
+library(cowplot)
+library(gridExtra)
 
 assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
@@ -36,9 +38,9 @@ assays$position <- factor(assays$position, levels = c("side", "top"))
 
 #subsets
 assays$mean2 <- as.factor(assays$X2.week_mean)
-wild <- assays[which(assays$treatment == "wild"),]
+#wild <- assays[which(assays$treatment == "wild"),]
 poster <- assays[which(assays$ï..collection != "3"),]
-data <- poster[which(poster$Ctmax < 32),]
+data <- poster[which(poster$species == "hudsonica"),]
 
 } 
 
@@ -47,10 +49,19 @@ data <- poster[which(poster$Ctmax < 32),]
 ####species - CTmax/length####
 ggplot(poster, aes(x = Ctmax, y = length, col = species))+
   geom_point(aes(shape = generation), size = 2.75)+
-  scale_color_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "species")+
+  scale_color_manual(values = c("#CFD4EB","#D5968F"), name = "species")+
   theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
+
+ggplot(poster, aes(x = species, y = Ctmax, fill = species))+
+  geom_boxplot()+
+  scale_fill_manual(values = c("#CFD4EB","#D5968F"), name = "")+
+  theme_light(base_size = 14)+
+  theme(legend.position = "none")+
+  scale_x_discrete(labels=c("hudsonica" = "A. hudsonica", "tonsa" = "A. tonsa"))+
+  xlab("Species")+
+  ylab("Critical thermal maximum in °C")
 
 ####CTmax####
 #CTmax - all collections
@@ -68,6 +79,7 @@ Ctmax_all <- ggplot(poster, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   xlab("Sampling time")+ ylab("Critical thermal maximum in °C")+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")
+Ctmax_all
 
 Ctmax_all +
   ylim(NA, max(poster$Ctmax)+ .5)+
@@ -89,7 +101,6 @@ Ctmax_out <- ggplot(data, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   xlab("Sampling time")+ ylab("Critical thermal maximum in °C")+
   theme(legend.position = "right")+
   scale_fill_manual(values = c("#96B48E","#CFD4EB","#D5968F"), name = "Treatment")
-
 Ctmax_out
 
 Ctmax_out +
@@ -195,7 +206,7 @@ p_1w <- ggplot(assays,aes(x=X1.week_mean,
   theme_light(base_size = 14)+
   ylab(expression("CT"["max"]* " in °C"))+
   xlab("Treatment temperature in °C")+
-  theme(legend.position = "none")+
+  theme(legend.position = "right")+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   geom_point(aes(shape = generation), size = 2.75)
@@ -204,7 +215,6 @@ p_1w # plot for 1 week mean temperature
 p1 <- p_1w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
 p1
 
-library(cowplot)
 legend <- get_legend(p1)
 
 group_2w <- interaction(assays$X2.week_mean,assays$sex_confirmed)#with 2-week mean
@@ -215,7 +225,7 @@ p_2w <- ggplot(assays,aes(x=X2.week_mean,
                           group = group_2w)) +
   theme_light(base_size = 14)+
   ylab(expression("CT"["max"]* " in °C"))+
-  xlab("Treatment temperature in °C")+
+  xlab("Developmental temperature in °C")+
   theme(legend.position = "none")+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
@@ -224,11 +234,33 @@ p_2w <- ggplot(assays,aes(x=X2.week_mean,
 p_2w # plot for 2 week mean temperature
 p2 <- p_2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
 
-library(gridExtra)
-grid.arrange(pm, p1, p2)
 
 combined_plot <- grid.arrange(pm, p1, p2, ncol = 1, nrow = 3)
 plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(3/4, 1/4))
+
+#2 week average but only hudsonica
+group_hud2w <- interaction(data$X2.week_mean,data$sex_confirmed)#with 2-week mean
+p_hud2w <- ggplot(data,aes(x=X2.week_mean, 
+                          y=Ctmax,
+                          color=sex_confirmed,
+                          fill = sex_confirmed,
+                          group = group_hud2w)) +
+  theme_light(base_size = 14)+
+  ylab(expression("CT"["max"]* " in °C"))+
+  xlab("Developmental temperature in °C")+
+  theme(legend.position = "none")+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  geom_point(aes(shape = generation), size = 2.75)
+
+p_hud2w # plot for 2 week mean temperature
+phud2 <- p_hud2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+phud2
+
+
+x11()
+combined_plot <- grid.arrange(p2, phud2, ncol = 1, nrow = 2)
+plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 
 ####length####
 #males and females - length
@@ -260,15 +292,32 @@ ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
-ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
+l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous()+
   theme_light(base_size = 14)+
+  theme(legend.position = "none")+
   xlab("Developmental temperature in °C")+
   ylab("Prosome length in µm")
+
+l_hud <- ggplot(data, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_x_continuous()+
+  theme_light(base_size = 14)+
+  theme(legend.position = "none")+
+  xlab("Developmental temperature in °C")+
+  ylab("Prosome length in µm")
+
+
+x11()
+combined <- grid.arrange(l_all, l_hud, ncol = 1, nrow = 2)
+plot_grid(combined, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 
 ####wild CTmax####
 #SST and wild CTmax
