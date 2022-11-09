@@ -38,9 +38,10 @@ assays$position <- factor(assays$position, levels = c("side", "top"))
 
 #subsets
 assays$mean2 <- as.factor(assays$X2.week_mean)
-#wild <- assays[which(assays$treatment == "wild"),]
 poster <- assays[which(assays$ï..collection != "3"),]
 data <- poster[which(poster$species == "hudsonica"),]
+wild <- assays[which(assays$treatment == "wild"),]
+wild <- wild[which(wild$species != "tonsa"),]
 
 } 
 
@@ -119,6 +120,15 @@ ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
   xlab("")+ ylab("Critical thermal maximum in °C")+
   labs(fill = "Developmental temperature in °C")+
   theme(legend.position = "bottom")
+
+box <- ggplot(wild, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
+  geom_boxplot()+
+  theme_light(base_size = 14)+
+  scale_fill_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous"), 0.5))+
+  scale_x_discrete(labels =c("6.36" = "Collection 1","12.86" = "Collection 3","11.44" = "Collection 2","16.55" = "Collection 4","18.11" = "Collection 5"))+
+  xlab("")+ ylab(expression("CT"["max"]* " in °C"))+
+  labs(fill = "Temp in °C")+
+  theme(legend.position = "right")
 
 #Ctmax developmental temperature (+treatment)
 ggplot(data, aes(x = mean2, y = Ctmax, fill = treatment))+
