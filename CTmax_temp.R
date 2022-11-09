@@ -30,9 +30,7 @@ for(i in 1:max(temp_r$trial, na.rm=T)){
 }
 
 
-temp_r$time_running <- as.time(temp_r$time_running)
-
-hist(highout, "heating rate per 30 seconds")
+hist(highout, xlab = "heating rate per 30 seconds")
 abline(v = mean(highout),                       # Add line for mean
        col = "red",
        lwd = 3)
@@ -153,8 +151,9 @@ colnames(table) <- col_names
 
 table$Date <- c("4-6", "5-16", "6-13", "6-27", "7-19" )
 
-#monthly temp
 
+
+####kimocc###
 kimocc <- read.csv("~/RStuff/masterarbeit/temperature/KIMOCC.csv", header = TRUE)
 #combine date and time
 kimocc$DT <- paste(kimocc$Date, kimocc$Time, sep = " ")
@@ -183,7 +182,7 @@ f <- ggplot(final,aes(Date, T..IPTS.90)) +
         panel.grid.minor = element_blank())+
   xlab("") +
   ylab("SST in °C")
-
+f
 #add sampling dates
 f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black", linetype = 3, size = 1)+
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-05-16"))), col = "black", linetype = 3, size = 1)+
@@ -191,6 +190,23 @@ f + geom_vline(aes(xintercept = as.numeric(as.Date("2022-04-06"))), col = "black
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-07-19"))), col = "black", linetype = 3, size = 1)+
     geom_vline(aes(xintercept = as.numeric(as.Date("2022-06-13"))), col = "darkgrey", linetype = 3, size = 1)
 
+rects <- data.frame(
+  name = c('col1', 'col2', 'col3', 'col4', 'col5'),
+  start = c("2022-03-23", "2022-05-02","2022-05-30", "2022-06-13", "2022-07-05"),
+  end = c("2022-04-06", "2022-05-16", "2022-06-13", "2022-06-27", "2022-07-19")
+)
+rects$start <- as.Date(rects$start)
+rects$end <- as.Date(rects$end)
+
+curve <- f + geom_rect(data = rects, inherit.aes=FALSE, mapping=aes(xmin = start, xmax = end,
+                                                       ymin = -Inf, ymax = Inf, fill = name), alpha = 0.35)+
+  scale_fill_manual(values = alpha(c("#3B9AB2", "#D5C660", "#E9C624", "#EC7B00", "#F21A00")))+
+  theme(legend.position = "none")
+
+x11()
+grid.arrange(curve, box, ncol = 2, nrow = 1)# box from CTmax_plots.R
+
+#####table stuff####
 #daily average
 mean(final$T..IPTS.90[which(final$Date == "2022-04-06")] )#5.81
 mean(final$T..IPTS.90[which(final$Date == "2022-05-16")] )#12.66
