@@ -130,6 +130,8 @@ box <- ggplot(wild, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
   labs(fill = "Temp in °C")+
   theme(legend.position = "right")
 
+box
+
 #Ctmax developmental temperature (+treatment)
 ggplot(data, aes(x = mean2, y = Ctmax, fill = treatment))+
   geom_boxplot(outlier.shape = NA)+
@@ -273,23 +275,13 @@ combined_plot <- grid.arrange(p2, phud2, ncol = 1, nrow = 2)
 plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 
 ####length####
-#males and females - length
+#males and females - length per CTmax
 ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 14)+
-  xlab("Critical thermal maximum in °C")+
-  ylab("Prosome length in µm")
-
-ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
-  geom_point(aes(shape = generation), size = 2.75)+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
-  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  scale_x_continuous(limits = c(22.5, 31))+
-theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
@@ -299,9 +291,28 @@ ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 14)+
+  ylim(495,930)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
+data2 <- data[which(data$ï..collection != "2"),]#removes weird behaving col 2
+data3 <- data2[which(data2$treatment != "wild"),]#removes wild ones
+#17 for triangle
+
+ggplot(data3, aes(y = length, x = Ctmax, col = sex_confirmed))+
+  geom_point(shape = 17, size = 2.75)+
+  facet_wrap(~treatment)+
+  theme_light(base_size = 14)+
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black'))+
+  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  ylim(495,930)+
+  xlab("Critical thermal maximum in °C")+
+  ylab("Prosome length in µm")
+
+#length per developmental temperature
 l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
@@ -324,7 +335,7 @@ l_hud <- ggplot(data, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   xlab("Developmental temperature in °C")+
   ylab("Prosome length in µm")
 
-
+l_hud
 x11()
 combined <- grid.arrange(l_all, l_hud, ncol = 1, nrow = 2)
 plot_grid(combined, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
