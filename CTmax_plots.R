@@ -88,10 +88,10 @@ Ctmax_all +
             position = position_dodge(width = .75))
 
 #Ctmax - outliers removed
-data2 <- distinct(data, date_sampling, treatment)%>%
+data1a <- distinct(data, date_sampling, treatment)%>%
   arrange(date_sampling, treatment)
-data2$yloc <- max(data$Ctmax)+ .5
-data2$label <- c("a", "b", "c", "b", "a", "c", "c", "b", "c", "c", "b")#compact letter from Ctmax_stats
+data1a$yloc <- max(data$Ctmax)+ .5
+data1a$label <- c("a", "b", "c", "b", "a", "c", "c", "b", "c", "c", "b")#compact letter from Ctmax_stats
 
 Ctmax_out <- ggplot(data, aes(x=date_sampling, y=Ctmax, fill=treatment))+
   geom_boxplot(outlier.shape = NA)+
@@ -106,7 +106,7 @@ Ctmax_out
 
 Ctmax_out +
   ylim(NA, max(data$Ctmax)+ .5)+
-  geom_text(data = data2, aes(y = yloc, label = label),
+  geom_text(data = data1a, aes(y = yloc, label = label),
             position = position_dodge(width = .75))
 
 
@@ -123,12 +123,12 @@ ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
 
 box <- ggplot(wild, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
   geom_boxplot()+
-  theme_light(base_size = 14)+
+  theme_light(base_size = 17)+
   scale_fill_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous"), 0.5))+
   scale_x_discrete(labels =c("6.36" = "Collection 1","12.86" = "Collection 3","11.44" = "Collection 2","16.55" = "Collection 4","18.11" = "Collection 5"))+
   xlab("")+ ylab(expression("CT"["max"]* " in °C"))+
-  labs(fill = "Temp in °C")+
-  theme(legend.position = "right")
+  theme(legend.position = "none")
+  
 
 box
 
@@ -276,21 +276,26 @@ plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 
 ####length####
 #males and females - length per CTmax
-ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
+all1 <- ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  theme_light(base_size = 14)+
+  theme_light(base_size = 9)+
+  theme(legend.position = "bottom")+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
 
-ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
+
+legend <- get_legend(all1)
+
+all <- ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
-  theme_light(base_size = 14)+
+  theme_light(base_size = 9)+
+  theme(legend.position = "none")+
   ylim(495,930)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
@@ -299,18 +304,24 @@ data2 <- data[which(data$ï..collection != "2"),]#removes weird behaving col 2
 data3 <- data2[which(data2$treatment != "wild"),]#removes wild ones
 #17 for triangle
 
-ggplot(data3, aes(y = length, x = Ctmax, col = sex_confirmed))+
+cold_warm <- ggplot(data3, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(shape = 17, size = 2.75)+
   facet_wrap(~treatment)+
-  theme_light(base_size = 14)+
+  theme_light(base_size = 9)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'black'))+
   geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  theme(legend.position = "none")+
   ylim(495,930)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
+
+cold_warm
+
+x11()
+plot_grid(all, cold_warm, legend, nrow = 3 , rel_heights  = c(5/10, 4/10, 1/10))
 
 #length per developmental temperature
 l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
