@@ -49,6 +49,8 @@ data_all  <- assays[which(assays$ï..collection != "3"),]
 #parents <- data_all[which(data_all$generation == "parental"),]
 #f1 <- data_all[which(data_all$generation == "f1"),]
 data_all$mean2 <- as.factor(data_all$X2.week_mean)
+warm <- data_all[which(data_all$treatment == "warm"),]
+wild <- assays[which(assays$treatment == "wild"),]
 data <- data_all[which(data_all$species == "hudsonica"),]
 data <- droplevels(data)
 
@@ -108,6 +110,12 @@ print(cor_col.treat)
 chisq.test(cor_col.treat)#"correlation"
 
 ####small models####
+library(rstatix)
+boxplot(warm$Ctmax ~ warm$species)
+a00 <- aov(warm$Ctmax ~warm$species)
+summary(a00)
+TukeyHSD(a00)
+warm %>% levene_test(Ctmax ~ species)
 
 boxplot(data_all$Ctmax ~ data_all$species)
 a0 <- aov(data_all$Ctmax ~ data_all$species)
@@ -124,6 +132,13 @@ a2 <- aov(data$Ctmax ~ data$treatment)
 summary(a2)
 TukeyHSD(a2)
 pairwise.t.test(data$Ctmax, data$treatment, p.adjust ="holm")
+
+boxplot(wild$Ctmax ~ wild$ï..collection)
+a2a <- aov(wild$Ctmax ~ wild$ï..collection)
+mm2a <- emmeans(object = a2a,
+                specs = "ï..collection")
+
+mm2a
 
 
 boxplot(data$Ctmax ~ data$mean2)
