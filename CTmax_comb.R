@@ -5,6 +5,72 @@
 
 #this document was used to create the final csv.files for data analysis
 
+####Polarfuchs CTD####
+#this section is a modified version of script by Theo Krueger
+
+library(tidyverse)
+
+# set to folder with TOB files
+input_folder <- "C:/Users/A.Hahn/Documents/RStuff/masterarbeit/polarfuchs/exp"
+# set to output folder or leave at default to save files in original folder
+# be careful as default only works in ONLY TOB files are in folder
+output_folder <- input_folder
+
+#####################################################
+
+{ # RUN HERE to run the whole script
+  
+  in_files <- list.files(input_folder)
+  out_files <- gsub(".TOB", ".csv", in_files)
+  
+  #prepare column names
+  col_names_df <- c("ID","Pressure..db","Temp..degC","Cond..mS.cm",
+                    "pH", "pH_Tc", "AO2_%..%", "CAP25..mS.cm", "SALIN..ppt",
+                    "DO_mg..mg.l","DO_ml..ml.l", "SIGMA..kg.m3", "SOUND..ms.s" 
+                    , "time", "date", "RawO2..mV")
+  col_names_master <- c("ID", "Pressure..db", "Temp..degC", "SALIN..ppt", 
+                        "Day", "Month", "Year", "time")
+  
+  #prepare master sheet
+  master <- data.frame(matrix(ncol = 8, nrow = 0))
+  colnames(master) <- col_names_master
+  
+  n <- 0
+  
+  for (file in in_files){
+    # keep count
+    n = n+1
+    print(paste("Processing:", in_files[n]))
+    
+    # read table
+    df <- read.table(paste0(input_folder, "/", file), skip =  29)
+    
+    # give meaningful column names
+    names(df) <- col_names_df
+    
+    # reformatting date
+    df <- df %>% separate(date, c("Day", "Month", "Year"))
+    
+    
+    # subset data to only include useful columns
+    df_useful <- subset(df, select = c(1:3, 9, 14:17))
+    
+    # add to master
+    master <- rbind(master, df_useful)
+    
+    # save individual file as csv
+    write.csv(df_useful, 
+              file = paste0(output_folder, "/", out_files[n]), row.names = FALSE)
+    
+    print(paste("Finished. File saved as:", out_files[n]))
+  }
+  
+  # save master as csv
+  write.csv(master,
+            file = paste0(output_folder, "/master.csv"), row.names = FALSE)
+  print(paste("Done. Master file saved as: master.csv"))
+}
+
 ####KIMOCC temperature data####
 col_names_df <- c("Year", "Month", "Day", "Hour", "Minute", "Second", "Depth..m", "SN", "C..mS.cm", "T..IPTS-90", "P..dbar", "Ox..ml.l", "PSAL..IPSS-78", "Sample")
 col_names_master <- c("Date", "Time", "T..IPTS-90")
