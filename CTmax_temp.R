@@ -10,6 +10,7 @@ setwd("C:/Users/A.Hahn/Documents/RStuff/masterarbeit/temperature")
 library(ggplot2)
 library(plyr)   
 library(dplyr)
+library(gridExtra)
 
 ####heaters####
 
@@ -88,7 +89,14 @@ ggplot(temp_r, aes(x = temperature, y = difference))+
 
 library(wesanderson)
 
-polarfuchs <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/master.csv")
+lines <- readLines("~/RStuff/masterarbeit/temperature/polarfuchs/exp/master2.csv")
+lines <- gsub('"', '', lines, fixed=TRUE)
+pol <- read.csv(textConnection(lines))
+write.csv(pol, file = "~/RStuff/masterarbeit/temperature/polarfuchs/exp/CTD.csv")
+
+
+polarfuchs <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/exp/master.csv", quote = "")
+
 polarfuchs$Date <- paste(polarfuchs$Year, polarfuchs$Month, polarfuchs$Day, sep = "-")
 polarfuchs$Date <- as.Date(polarfuchs$Date)
 
@@ -102,7 +110,7 @@ ggplot(polarfuchs, aes(x = Date, y = Pressure..db, color = Temp..degC))+
     y = "Depth [m]", x = "Date", color = "Temperature [°C]")
  
 
-p_exp <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/exp/master.csv")
+p_exp <- read.csv("~/RStuff/masterarbeit/temperature/polarfuchs/exp/CTD.csv")
 p_exp$Date <- paste(p_exp$Year, p_exp$Month, p_exp$Day, sep = "-")
 
 p_exp$Date <- as.Date(p_exp$Date) 
@@ -115,7 +123,7 @@ t <- ggplot(p_exp, aes(x = Date, y = Pressure..db, color = Temp..degC))+
   theme_classic()+
   labs(title = "Water temperature at sampling dates",
        y = "Depth [m]", x = "Month", color = "Temp [°C]")
-
+t
 
 ##salinity
 
@@ -127,7 +135,7 @@ s <- ggplot(p_exp, aes(x = Date, y = Pressure..db, color = SALIN..ppt))+
   labs(title = "Salinity at sampling dates",
        y = "Depth [m]", x = "Month", color = "Salinity [ppt]")
 
-library(gridExtra)
+x11()
 grid.arrange(t,s, ncol = 1, nrow = 2)
 
 
