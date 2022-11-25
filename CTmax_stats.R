@@ -250,12 +250,14 @@ type3 <- list(treatment = contr.sum,ï..collection = contr.sum, sex_confirmed = 
 M1 <- lm(Ctmax ~ treatment * ï..collection * sex_confirmed * length, data = data)
 M1a <- lm(Ctmax~ treatment *  ï..collection + sex_confirmed + length + sex_confirmed:length, data= data )
 M1b <- lm(Ctmax~ treatment *  ï..collection + sex_confirmed + length, data= data, contrasts = type3)
+M1b_all <- lm(Ctmax~ treatment *  ï..collection + sex_confirmed + length + species, data= data_all, contrasts = type3)
 anova(M1a, M1b)
 anova(M1b, M1)
 AIC(M1, M1b)# keep M1b
 summary(M1b)
 anova(M1b)
 Anova(M1b, singular.ok = T, type = 3)
+Anova(M1b_all, singular.ok = T, type = 3)
 #M1a <- lm(Ctmax ~ treatment * ï..collection * sex_confirmed * length * species, data = data_all)
 summary(M1)#adj. R squared 0.7252
 summary(M1a)#0.9403
@@ -391,6 +393,30 @@ plot(cooks.distance(m4), type="h")#cook's distance shouldn't be larger than 1
 #post-hoc testing with emmeans
 
 pairs(emmeans(M1b , ~ï..collection|treatment|length|sex_confirmed))
+pairs(emmeans(M1b_all, ~ï..collection|treatment|length|sex_confirmed|species))
 #that's it?
+
+
+#####for length####
+
+ML1 <- lm(length~ï..collection*treatment + sex_confirmed, data = data)
+ML1b <- lm(length~mean2 + sex_confirmed, data = data)
+ML2 <- lm(length~Ctmax+sex_confirmed, data = data)
+summary(ML1); summary(ML1b); summary(ML2)
+anova(ML1); anova(ML2); anova(ML1b)
+
+hist(resid(ML1)); hist(resid(ML2)); hist(resid(ML1b))
+ols_test_normality(ML1); ols_test_normality(ML1b); ols_test_normality(ML2)
+
+
+par(mfrow = c(2,2))
+plot(ML1)
+plot(ML1b)
+plot(ML2)
+par(mfrow = c(1,1))
+
+
+pairs(emmeans(ML1b, ~mean2|sex_confirmed))
+
 
 
