@@ -16,6 +16,12 @@ assays <- read.csv("~/RStuff/masterarbeit/assays.csv", sep=";", header = TRUE)
 assays <- assays[-c(1, 59, 136, 246), ]#remove dead or inactive
 assays <-  assays[!(is.na(assays$ï..collection)),]
 
+data_species <- read.csv("~/RStuff/masterarbeit/data_species.csv", sep=";", header = TRUE)
+data_species <- data_species[-c(1, 59, 136, 246), ]#remove dead or inactive
+data_species <-  data_species[!(is.na(data_species$ï..collection)),]
+data_species <- data_species[which(data_species$ï..collection != "3"),]
+
+
 #Run for prep 
 {
 
@@ -26,7 +32,10 @@ assays<- assays %>%
     grepl("L", assays$ID) ~ "left"
   ))
 
-assays$length <- (assays$length1+assays$length2+assays$length3)/3               #new column mean length in µm
+assays$length <- (assays$length1+assays$length2+assays$length3)/3  #new column mean length in µm
+data_species$length <- (data_species$length1+data_species$length1+data_species$length1)/3
+data_species$species <- as.factor(data_species$species)
+data_species$generation <- factor(data_species$generation, levels = c("parental", "f1"))
 
 # set as factor
 assays$ï..collection <- factor(assays$ï..collection, levels =c("1", "2", "3", "4", "5"))
@@ -51,6 +60,13 @@ wild <- wild[which(wild$species != "tonsa"),]
 ggplot(poster, aes(x = Ctmax, y = length, col = species))+
   geom_point(aes(shape = generation), size = 2.75)+
   scale_color_manual(values = c("#CFD4EB","#D5968F"), name = "species")+
+  theme_light(base_size = 14)+
+  xlab("Critical thermal maximum in °C")+
+  ylab("Prosome length in µm")
+
+ggplot(data_species, aes(x = Ctmax, y = length, col = species))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  scale_color_manual(values = c("#CFD4EB","#D5968F","#333333", "#96B48E"), name = "species")+
   theme_light(base_size = 14)+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
@@ -122,9 +138,11 @@ ggplot(data, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
   theme(legend.position = "bottom")
 
 box <- ggplot(wild, aes(x = mean2, y = Ctmax, fill = X2.week_mean))+
-  geom_boxplot()+
+  geom_boxplot(outlier.shape = NA)+
+  geom_point(position = position_jitterdodge(jitter.width = 0.2), aes(col = X2.week_mean, alpha = 0.2))+
   theme_light(base_size = 17)+
   scale_fill_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous"), 0.5))+
+  scale_color_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous"), 0.1))+
   scale_x_discrete(labels =c("6.36" = "Collection 1","12.86" = "Collection 3","11.44" = "Collection 2","16.55" = "Collection 4","18.11" = "Collection 5"))+
   xlab("")+ ylab(expression("CT"["max"]* " in °C"))+
   theme(legend.position = "none")
@@ -189,7 +207,7 @@ p <- ggplot(assays,aes(x=temperature,
   geom_point(aes(shape = generation), size = 2.75)
 #"#FF8275","#8BA4FF" for darker colours
 p 
-p + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+p + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed))
 
 group_mean <- interaction(assays$daily_mean,assays$sex_confirmed)#with daily mean kimocc
 p_mean <- ggplot(assays,aes(x=daily_mean, 
@@ -207,7 +225,7 @@ p_mean <- ggplot(assays,aes(x=daily_mean,
 #"#FF8275","#8BA4FF" for darker colours
 
 p_mean # plot for daily mean temperature
-pm <- p_mean + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+pm <- p_mean + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed))
 
 group_1w <- interaction(assays$X1.week_mean,assays$sex_confirmed)#with 1-week mean
 p_1w <- ggplot(assays,aes(x=X1.week_mean, 
@@ -224,7 +242,7 @@ p_1w <- ggplot(assays,aes(x=X1.week_mean,
   geom_point(aes(shape = generation), size = 2.75)
 
 p_1w # plot for 1 week mean temperature
-p1 <- p_1w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+p1 <- p_1w + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed))
 p1
 
 legend <- get_legend(p1)
@@ -244,7 +262,7 @@ p_2w <- ggplot(assays,aes(x=X2.week_mean,
   geom_point(aes(shape = generation), size = 2.75)
 
 p_2w # plot for 2 week mean temperature
-p2 <- p_2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+p2 <- p_2w + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed))
 
 
 combined_plot <- grid.arrange(pm, p1, p2, ncol = 1, nrow = 3)
@@ -266,7 +284,7 @@ p_hud2w <- ggplot(data,aes(x=X2.week_mean,
   geom_point(aes(shape = generation), size = 2.75)
 
 p_hud2w # plot for 2 week mean temperature
-phud2 <- p_hud2w + geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed))
+phud2 <- p_hud2w + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed))
 phud2
 
 
@@ -278,7 +296,7 @@ plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 #males and females - length per CTmax
 all1 <- ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 9)+
@@ -291,7 +309,7 @@ legend <- get_legend(all1)
 
 all <- ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 9)+
@@ -310,7 +328,7 @@ cold_warm <- ggplot(data3, aes(y = length, x = Ctmax, col = sex_confirmed))+
   theme_light(base_size = 9)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'black'))+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme(legend.position = "none")+
@@ -326,7 +344,7 @@ plot_grid(all, cold_warm, legend, nrow = 3 , rel_heights  = c(5/10, 4/10, 1/10))
 #length per developmental temperature
 l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous()+
@@ -337,7 +355,7 @@ l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
 
 l_hud <- ggplot(data, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
-  geom_smooth(method = "lm", col ="grey", aes(group = sex_confirmed, fill = sex_confirmed))+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_x_continuous()+
@@ -373,7 +391,16 @@ ggplot(sub, aes(x=Date, y=Temperature, group=Origin, color=Origin)) +
     axis.text.y.right = element_text(color = mycolors["ctmax"]),
     legend.position = "none")
 
-wild <- assays[which(assays$treatment == "wild"),]
+ggplot(wild, aes(y = Ctmax, x = X2.week_mean))+
+  geom_point(size = 2.75, col = "#96B48E")+
+  geom_smooth(method = "lm", aes(col = "#96B48E", fill = "#96B48E"))+
+  scale_color_manual(values = c("#96B48E"), name = "")+
+  scale_fill_manual(values = c("#96B48E"), name = "")+
+  theme_light(base_size = 14)+
+  theme(legend.position = "none")+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Mean SST in °C")
+
 cor.test(wild$Ctmax, wild$X2.week_mean, method = "spearman")
 #strong correlation btw wild Ctmax and temperature, spearman's p = 0.771
 #stonger than for "temperature" 
