@@ -418,5 +418,11 @@ par(mfrow = c(1,1))
 
 pairs(emmeans(ML1b, ~mean2|sex_confirmed))
 
+male <- data[which(data$sex_confirmed == "m"),]
+female <- data[which(data$sex_confirmed == "f"),]
+ML_m <- lm(Ctmax~length, data = male)
+ML_f <- lm(Ctmax~length, data = female)
 
-
+summary(ML_m); summary(ML_f)
+coef(ML_m)[2]
+coef(ML_f)[2]
