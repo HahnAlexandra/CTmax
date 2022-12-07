@@ -246,6 +246,9 @@ p1 <- p_1w + geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_con
 p1
 
 legend <- get_legend(p1)
+ library(grid)
+x11()
+grid.draw(legend)
 
 group_2w <- interaction(assays$X2.week_mean,assays$sex_confirmed)#with 2-week mean
 p_2w <- ggplot(assays,aes(x=X2.week_mean, 
@@ -294,51 +297,65 @@ plot_grid(combined_plot, legend, ncol = 2 , rel_widths = c(4/5, 1/5))
 
 ####length####
 #males and females - length per CTmax
-all1 <- ggplot(assays, aes(y = length, x = Ctmax, col = sex_confirmed))+
+all1 <- ggplot(assays, aes(y = Ctmax, x = length, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 9)+
   theme(legend.position = "bottom")+
-  xlab("Critical thermal maximum in °C")+
-  ylab("Prosome length in µm")
+  ylab("Critical thermal maximum in °C")+
+  xlab("Prosome length in µm")
 
 
 legend <- get_legend(all1)
 
-all <- ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
+all <- ggplot(data, aes(y = Ctmax, x = length, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
   geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme_light(base_size = 9)+
   theme(legend.position = "none")+
-  ylim(495,930)+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Prosome length in µm")
+
+all2 <- ggplot(data, aes(y = length, x = Ctmax, col = sex_confirmed))+
+  geom_point(aes(shape = generation), size = 2.75)+
+  geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
+  scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
+  theme_light(base_size = 9)+
+  theme(legend.position = "none")+
   xlab("Critical thermal maximum in °C")+
   ylab("Prosome length in µm")
+
+all
+all2
+
+ggarrange(all, all2, nrow =2)
 
 data2 <- data[which(data$ï..collection != "2"),]#removes weird behaving col 2
 data3 <- data2[which(data2$treatment != "wild"),]#removes wild ones
 #17 for triangle
 
-cold_warm <- ggplot(data3, aes(y = length, x = Ctmax, col = sex_confirmed))+
+cold_warm <- ggplot(data3, aes(y = Ctmax, x = length, col = sex_confirmed))+
   geom_point(shape = 17, size = 2.75)+
   facet_wrap(~treatment)+
   theme_light(base_size = 9)+
   theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'black'))+
+  theme(strip.text = element_text(colour = 'black', size = 10))+
   geom_smooth(method = "lm", aes(group = sex_confirmed, col = sex_confirmed, fill = sex_confirmed))+
   scale_color_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   scale_fill_manual(values = c("#D5968F","#CFD4EB"), name = "sex")+
   theme(legend.position = "none")+
-  ylim(495,930)+
-  xlab("Critical thermal maximum in °C")+
-  ylab("Prosome length in µm")
+  ylab("Critical thermal maximum in °C")+
+  xlab("Prosome length in µm")
 
 cold_warm
 
 x11()
+
 plot_grid(all, cold_warm, legend, nrow = 3 , rel_heights  = c(5/10, 4/10, 1/10))
 
 #length per developmental temperature
@@ -350,8 +367,8 @@ l_all <- ggplot(assays, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   scale_x_continuous()+
   theme_light(base_size = 14)+
   theme(legend.position = "none")+
-  xlab("Developmental temperature in °C")+
-  ylab("Prosome length in µm")
+  ylab("Developmental temperature in °C")+
+  xlab("Prosome length in µm")
 
 l_hud <- ggplot(data, aes(y = length, x = X2.week_mean, col = sex_confirmed))+
   geom_point(aes(shape = generation), size = 2.75)+
@@ -400,6 +417,17 @@ ggplot(wild, aes(y = Ctmax, x = X2.week_mean))+
   theme(legend.position = "none")+
   ylab("Critical thermal maximum in °C")+
   xlab("Mean SST in °C")
+
+ggplot(wild, aes(y = Ctmax, x = X2.week_mean, col = X2.week_mean))+
+  geom_point(size = 2.75)+
+  geom_smooth(method = "lm", color = "grey", fill = "lightgrey")+
+  scale_fill_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous")))+
+  scale_color_gradientn(colors = alpha(wes_palette("Zissou1", type = "continuous"),0.5))+
+  theme_light(base_size = 14)+
+  theme(legend.position = "none")+
+  ylab("Critical thermal maximum in °C")+
+  xlab("Mean SST in °C")
+
 
 cor.test(wild$Ctmax, wild$X2.week_mean, method = "spearman")
 #strong correlation btw wild Ctmax and temperature, spearman's p = 0.771
