@@ -418,11 +418,46 @@ par(mfrow = c(1,1))
 
 pairs(emmeans(ML1b, ~mean2|sex_confirmed))
 
+#stats for Ctmax~length plot
+
 male <- data[which(data$sex_confirmed == "m"),]
 female <- data[which(data$sex_confirmed == "f"),]
+
+cold <- data3[which(data3$treatment == "cold"),]
+warm <- data3[which(data3$treatment == "warm"),]
+
+cold_m <- cold[which(cold$sex_confirmed == "m"),]
+warm_m <- warm[which(warm$sex_confirmed == "m"),]
+
+cold_f <- cold[which(cold$sex_confirmed == "f"),]
+warm_f <- warm[which(warm$sex_confirmed == "f"),]
+
+ML_mf <- lm(Ctmax~length + sex_confirmed ,data = data)
 ML_m <- lm(Ctmax~length, data = male)
 ML_f <- lm(Ctmax~length, data = female)
 
-summary(ML_m); summary(ML_f)
-coef(ML_m)[2]
-coef(ML_f)[2]
+ML_cm <- lm(Ctmax~length, data = cold_m)
+ML_wm <- lm(Ctmax~length, data = warm_m)
+ML_cf <- lm(Ctmax~length, data = cold_f)
+ML_wf <- lm(Ctmax~length, data = warm_f)
+
+ML_cold <- lm(Ctmax~length + sex_confirmed, data = cold)
+ML_warm <- lm(Ctmax~length + sex_confirmed, data = warm)
+
+summary(ML_m); summary(ML_f); summary(ML_mf)
+anova(ML_mf); anova(ML_cold); anova(ML_warm)
+coef(ML_m)
+coef(ML_f)
+coef(ML_cm)
+coef(ML_wm)
+coef(ML_cf)
+coef(ML_wf)
+
+#correlations temperature CTmax
+cor.test(assays$daily_mean, assays$Ctmax, method = "spearman")
+cor.test(assays$X1.week_mean, assays$Ctmax, method = "spearman")
+cor.test(assays$X2.week_mean, assays$Ctmax, method = "spearman")
+cor.test(assays$daily_mean, assays$Ctmax, method = "pearson")
+cor.test(assays$X1.week_mean, assays$Ctmax, method = "pearson")
+cor.test(assays$X2.week_mean, assays$Ctmax, method = "pearson")
+
